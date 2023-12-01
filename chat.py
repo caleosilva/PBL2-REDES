@@ -29,14 +29,9 @@ def server():
     server_adress = (my_info['host'], my_info['port'])
     server_socket.bind(server_adress)
 
-    print("Ouvindo em ", server_adress)
-
     while True:
         data, client_address = server_socket.recvfrom(1024)
         dataObj = json.loads(data)
-
-        print("data: ", dataObj)    
-        print("client_address: ", client_address)
 
         user_thread = threading.Thread(
             target=handle_request, args=(dataObj, client_address))
@@ -44,18 +39,19 @@ def server():
 
 
 def handle_request(dataObj, client_address):
-
-    print(dataObj['type'])
     try:
         if dataObj['type'] == 'sync':
-            print("Solicitiação de sync")
-            # handle_sync_request(mensagemJson, user_socket)
+            list_messages = module.receive_messages()
+            print("list_message: ", list_messages)
         elif dataObj['type'] == 'msg':
-            print('Vou adicionar')
             handle_mensagem(dataObj, mi_redes)
+            # 
+        elif dataObj['type'] == 'on-sync':
+            # Só recebe msg
+            pass
 
     except Exception as e:
-        print("Erro ao lidar com o usuário:", e)
+        print("Erro ao lidar com o request:", e)
 
 
 def handle_mensagem(objMsg, lista_mensagens):
@@ -64,37 +60,8 @@ def handle_mensagem(objMsg, lista_mensagens):
 
 
 def sync_messages():
-    # Obtém o ID local
-    # id_local = module.get_my_latest_index(mi_redes)
 
-    # # Obtém o ID da última mensagem e o usuário atualizado
-    # id_ultima_msg, userAtualizado = module.get_latest_id_and_user(
-    #     data_users, my_info)
-
-    # # Verifica se é necessário sincronizar
-    # if module.check_need_sync(id_local, id_ultima_msg):
-    #     try:
-    #         # Abre um socket e conecta ao usuário atualizado
-    #         user_socket = socket.socket()
-    #         user_socket.connect(
-    #             (userAtualizado['host'], userAtualizado['port']))
-
-    #         # Cria uma mensagem de sincronização e a envia
-    #         objMsg = {'header': 'sync', 'id_local': id_local}
-    #         dadosMsn = json.dumps(objMsg)
-    #         user_socket.send(dadosMsn.encode())
-
-    #         # Recebe a lista sincronizada
-    #         recv_list = module.recv_message_list(user_socket)
-    #         print("sync_messages: ", recv_list)
-    #         handle_update_list(mi_redes, recv_list)
-
-    #     except Exception as e:
-    #         print("Erro ao sincronizar mensagens:", e)
-    #     finally:
-    #         user_socket.close()
-
-    # # Exibe as mensagens
+    # Exibe as mensagens
     show_messages(mi_redes)
 
 
@@ -126,16 +93,10 @@ def send_messages():
             handle_mensagem(objMsg, mi_redes)
 
             # Envie a mensagem para outros usuários
-            client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            for user in data_users:
-                if (my_info['port'] != user['port'] and my_info['nome'] != user['nome']):
-                    print(user)
-                    try:
-                        client_socket.sendto(json.dumps(objMsg).encode(), (user['host'], user['port']))
-                    except Exception as e:
-                        print(e)
+            module.send_message(objMsg, my_info, data_users)
             
             # mandar a nova lista para todos os usuários online
+            module.send_message_list(mi_redes, my_info, data_users)
 
             # receber a lista de todos e sincronizar
 
