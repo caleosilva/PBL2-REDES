@@ -2,7 +2,9 @@ import module
 import socket
 import threading
 import json
+ 
 
+ # CRIAR UM ID PARA LISTA
 
 HOST_LISTEN = "10.0.0.103"
 
@@ -29,20 +31,23 @@ def server():
     server_adress = (my_info['host'], my_info['port'])
     server_socket.bind(server_adress)
 
+    list_sync = []
+
     while True:
         data, client_address = server_socket.recvfrom(1024)
         dataObj = json.loads(data)
+        print('recebi no server')
 
         user_thread = threading.Thread(
-            target=handle_request, args=(dataObj, client_address))
+            target=handle_request, args=(dataObj, client_address, list_sync))
         user_thread.start()
 
 
-def handle_request(dataObj, client_address):
+def handle_request(dataObj, client_address, list_sync):
     try:
         if dataObj['type'] == 'sync':
-            list_messages = module.receive_messages()
-            print("list_message: ", list_messages)
+            list_messages = module.recv_message_list(dataObj, client_address, list_sync)
+            # print("list_message: ", list_messages)
         elif dataObj['type'] == 'msg':
             handle_mensagem(dataObj, mi_redes)
             # 
@@ -89,6 +94,7 @@ def send_messages():
             objMsg = {'type': 'msg', 'index': index_message, 'id': id_message,
                       'msg': mensagem, 'sender': my_info}
 
+            # ELE TÁ RECEBENDO TYPE, TENHO QUE ALTERAR ISSO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             # Envia a mensagem para a lista de mensagens local
             handle_mensagem(objMsg, mi_redes)
 

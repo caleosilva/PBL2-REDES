@@ -85,19 +85,14 @@ def send_message_list(message_list, my_info, data_users):
         # Fecha o socket após o envio
         client_socket.close()
 
-def recv_message_list(user_address):
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    server_socket.bind(user_address)
-
-    list_message = []
+def recv_message_list(dataObj, client_address, list_sync):
 
     try:
-        while True:
-            data, client_address = server_socket.recvfrom(1024)
-            received_message = json.loads(data.decode())
-            print("Mensagem recebida:", received_message)
+        list_sync.append()
+
+        print("dataObj: ", dataObj)
+        print("client_address: ", client_address)   
+        print("\n\n")
 
     except KeyboardInterrupt:
         print("Servidor encerrado pelo usuário.")
-    finally:
-        server_socket.close()
