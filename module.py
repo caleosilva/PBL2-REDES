@@ -40,7 +40,7 @@ def send_message(objMsg, my_info, data_users):
                 print(e)
 
 def show_messages(group_messages, my_info):
-    clear_screen()
+    # clear_screen()
 
     print('--------------------------------------------------')
     print('|                   MI - REDES                   |')

@@ -60,6 +60,8 @@ def handle_request(message_queue, clock):
     while True:
         message = message_queue.get()
 
+        print(message, '\n')
+
         try:
             if message['type'] == 'msg':
                 clock.update(message['time'])
@@ -103,14 +105,6 @@ def write_prepare_message(clock):
 
             # Atualiza o relógio
             clock.increment()
-            
-
-def sync_messages():
-    # 1- Mandar minha lista para todos.
-    # 2- Receber a lista de todos
-    # 3- Unir as listas
-    pass
-
 
 '''
 Função responsável por identificar o usuário e realizar o "LOGIN".
@@ -145,8 +139,6 @@ def start():
 
     sync_clock_thread = threading.Thread(target=send_clock_to_sync, args=(clock,))
     sync_clock_thread.start()
-
-
 
     server_thread = threading.Thread(target=server, args=(message_queue,))
     server_thread.start()
