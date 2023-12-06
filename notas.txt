@@ -1,0 +1,10 @@
+CRIAR UM ID PARA LISTA
+
+USAR BUFFER PARA ADICIONAR AS REQUISIÇÕES RECEBIDAS, THREAD PARA ISSO.
+
+THERAD ARA SEPARAR POR TIPO
+
+E OUTRA PRA PROCESSAR
+
+-----------------------------------------------------------------------
+Quando fica on, dar um ECO para sincronizar os relógios

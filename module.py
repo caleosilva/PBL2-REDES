@@ -13,12 +13,12 @@ def generete_id():
     return str(uuid.uuid4())
 
 
-def get_my_latest_index(list_messages):
-    last_id = False
+# def get_my_latest_index(list_messages):
+#     last_id = False
 
-    if (len(list_messages) > 0):
-        last_id = list_messages[-1]['index']
-    return last_id
+#     if (len(list_messages) > 0):
+#         last_id = list_messages[-1]['index']
+#     return last_id
 
 
 '''
@@ -96,3 +96,28 @@ def recv_message_list(dataObj, client_address, list_sync):
 
     except KeyboardInterrupt:
         print("Servidor encerrado pelo usuário.")
+
+def show_messages(group_messages, my_info):
+    # module.clear_screen()
+
+    print(group_messages)
+
+    print('--------------------------------------------------')
+    print('|                   MI - REDES                   |')
+    print('--------------------------------------------------\n\n')
+
+    for dicionarioMensagem in group_messages:
+
+        if (dicionarioMensagem['sender']['host'] == my_info['host'] and dicionarioMensagem['sender']['port'] == my_info['port']):
+            print(
+                f'\t\t({dicionarioMensagem["time"]}) {dicionarioMensagem["sender"]["nome"]} -> {dicionarioMensagem["msg"]}\n')
+        else:
+            print(
+                f'({dicionarioMensagem["time"]}) {dicionarioMensagem["sender"]["nome"]} -> {dicionarioMensagem["msg"]}\n')
+
+def handle_mensagem(objMsg, lista_mensagens, my_info):
+    copia = (objMsg.copy())
+    copia.pop('type')
+
+    lista_mensagens.append(copia)
+    show_messages(lista_mensagens, my_info)

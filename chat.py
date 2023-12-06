@@ -2,11 +2,12 @@ import module
 import socket
 import threading
 import json
- 
+import time
+from queue import Queue
 
- # CRIAR UM ID PARA LISTA
 
-HOST_LISTEN = "10.0.0.103"
+
+HOST_LISTEN = "127.0.0.1"
 
 data_users = [
     {"host": HOST_LISTEN, "port": 1111, "nome": "jose"},
@@ -17,115 +18,94 @@ data_users = [
 my_info = {'host': HOST_LISTEN, 'port': '', 'nome': ''}
 
 mi_redes = [
-    {'index': 1, 'id': '0d623e1a-1e0a-4c72-9455-e9268f880768', 'msg': 'Alguem online?',
-        'sender': {"host": HOST_LISTEN, "port": 1111, "nome": "jose"}},
-    {'index': 2, 'id': '07908719-c648-4e2e-ba1d-b176a897db78', 'msg': 'Aloo?',
-        'sender': {"host": HOST_LISTEN, "port": 1111, "nome": "jose"}},
-    {'index': 3, 'id': 'e28f3b19-386e-43b3-b030-22ef0269fb1e', 'msg': 'Oii, to aqui',
-        'sender':     {"host": HOST_LISTEN, "port": 2222, "nome": "maria"}}
+    
 ]
 
+# Relógio lógico
+class LamportClock:
+    def __init__(self):
+        self.value = 0
+        self.lock = threading.Lock()
 
-def server():
+    def increment(self):
+        with self.lock:
+            self.value += 1
+            return self.value
+
+    def update(self, received_time):
+        with self.lock:
+            self.value = max(self.value, received_time) + 1
+            return self.value
+
+
+# Ouvido
+def server(clock, message_queue):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_adress = (my_info['host'], my_info['port'])
     server_socket.bind(server_adress)
 
-    list_sync = []
-
     while True:
         data, client_address = server_socket.recvfrom(1024)
         dataObj = json.loads(data)
-        print('recebi no server')
+        print('\n', dataObj)
+        print(f"Received: {dataObj['msg']} at Lamport time {clock.value}\n")
 
-        user_thread = threading.Thread(
-            target=handle_request, args=(dataObj, client_address, list_sync))
-        user_thread.start()
-
-
-def handle_request(dataObj, client_address, list_sync):
-    try:
-        if dataObj['type'] == 'sync':
-            list_messages = module.recv_message_list(dataObj, client_address, list_sync)
-            # print("list_message: ", list_messages)
-        elif dataObj['type'] == 'msg':
-            handle_mensagem(dataObj, mi_redes)
-            # 
-        elif dataObj['type'] == 'on-sync':
-            # Só recebe msg
-            pass
-
-    except Exception as e:
-        print("Erro ao lidar com o request:", e)
+        clock.update(dataObj['time'])
 
 
-def handle_mensagem(objMsg, lista_mensagens):
-    lista_mensagens.append(objMsg)
-    show_messages(mi_redes)
+        message_queue.put(dataObj)
+
+def handle_request(message_queue):
+    while True:
+        message = message_queue.get()
+        print(f"Processing: {message['msg']} at Lamport time {message['time']}")
+
+        try:
+            if message['type'] == 'sync':
+                # list_messages = module.recv_message_list(message, client_address, list_sync)
+                pass
+            elif message['type'] == 'msg':
+                module.handle_mensagem(message, mi_redes, my_info)
+            elif message['type'] == 'on-sync':
+                pass
+        except Exception as e:
+            print("Erro ao lidar com o request:", e)
+
 
 
 def sync_messages():
-
     # Exibe as mensagens
-    show_messages(mi_redes)
+    module.show_messages(mi_redes, my_info)
 
-
-def send_messages():
+# Manda mensagens
+def write_prepare_message(clock):
     while True:
         mensagem = input("")
 
         if (mensagem != ""):
-            # Obtém o último index local
-            my_last_index = module.get_my_latest_index(mi_redes)
 
-            # Gera o próximo ID da mensagem
+            lamport_time = clock.increment()
             id_message = module.generete_id()
-            index_message = 1
-            if my_last_index:
-                index_message = int(my_last_index) + 1
 
-            # {
-            # 'type: 'msg' || 'type: 'sync', 'size-list': 4
-            # 'index': 3, 
-            # 'id': 'e28f3b19-386e-43b3-b030-22ef0269fb1e', 
-            # 'msg': 'Oii, to aqui',
-            # 'sender': {"host": HOST_LISTEN, "port": 2222, "nome": "maria"}}
+            objMsg = {'type': 'msg', 'time': lamport_time, 'id': id_message, 'msg': mensagem, 'sender': my_info}
+            
+            #{'time': , 'id': '', 'msg': '', 'sender': {}},
 
-            objMsg = {'type': 'msg', 'index': index_message, 'id': id_message,
-                      'msg': mensagem, 'sender': my_info}
+            # ELE TÁ RECEBENDO TYPE E NÃO TA TRATANDO ANTES DE ADD NA LISTA, TENHO QUE ALTERAR ISSO !!!!!!!!!!!!!!
 
-            # ELE TÁ RECEBENDO TYPE, TENHO QUE ALTERAR ISSO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             # Envia a mensagem para a lista de mensagens local
-            handle_mensagem(objMsg, mi_redes)
+            module.handle_mensagem(objMsg, mi_redes, my_info)
 
             # Envie a mensagem para outros usuários
             module.send_message(objMsg, my_info, data_users)
             
             # mandar a nova lista para todos os usuários online
-            module.send_message_list(mi_redes, my_info, data_users)
+            # module.send_message_list(mi_redes, my_info, data_users)
 
             # receber a lista de todos e sincronizar
+    
 
-
-def show_messages(group_messages):
-    # module.clear_screen()
-
-    print(group_messages)
-
-    print('--------------------------------------------------')
-    print('|                   MI - REDES                   |')
-    print('--------------------------------------------------\n\n')
-
-    for dicionarioMensagem in group_messages:
-
-        if (dicionarioMensagem['sender']['host'] == my_info['host'] and dicionarioMensagem['sender']['port'] == my_info['port']):
-            print(
-                f'\t\t{dicionarioMensagem["sender"]["nome"]} -> {dicionarioMensagem["msg"]}\n')
-        else:
-            print(
-                f'{dicionarioMensagem["sender"]["nome"]} -> {dicionarioMensagem["msg"]}\n')
-
-
+# mudar a forma que o login está sendo feito
 def main():
     print('-=-=-=-= BEM VINDO =-=-=-=-\n\n')
 
@@ -147,13 +127,21 @@ def main():
 
 
 def start():
+    clock = LamportClock()
+    message_queue = Queue()
+
     accept_thread = threading.Thread(target=sync_messages, args=())
     accept_thread.start()
 
-    accept_thread = threading.Thread(target=server, args=())
+    accept_thread = threading.Thread(target=server, args=(clock, message_queue))
     accept_thread.start()
 
-    accept_thread = threading.Thread(target=send_messages, args=())
+    process_thread = threading.Thread(target=handle_request, args=(message_queue,))
+    process_thread.start()
+
+
+
+    accept_thread = threading.Thread(target=write_prepare_message, args=(clock,))
     accept_thread.start()
 
 
