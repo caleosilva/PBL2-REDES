@@ -1,21 +1,29 @@
-HOST_LISTEN = "10.0.0.103"
+list_sync = {
+    15243: [{'id_list': 15243, 'msg': 'oi', 'time': 1, 'id': 'ABC321'}, {'id_list': 15243, 'msg': 'opaa', 'time': 2, 'id': '3333'}],
+    98765: [{'id_list': 98765, 'msg': 'opaa', 'time': 2, 'id': '2222'}],
+}
 
+def extrair_e_ordenar_mensagens(list_sync):
+    # Dicionário para garantir mensagens únicas
+    mensagens_unicas = {}
 
-mi_redes = [
-    {'index': 1, 'id': '0d623e1a-1e0a-4c72-9455-e9268f880768', 'msg': 'Alguem online?', 'sender': {"host": HOST_LISTEN, "port": 1111, "nome": "jose"}},
-    {'index': 2, 'id': '07908719-c648-4e2e-ba1d-b176a897db78', 'msg': 'Aloo?', 'sender': {"host": HOST_LISTEN, "port": 1111, "nome": "jose"}},
-    {'index': 3, 'id': 'e28f3b19-386e-43b3-b030-22ef0269fb1e', 'msg': 'Oii, to aqui', 'sender':     {"host": HOST_LISTEN, "port": 2222, "nome": "maria"}}
-]
+    for lista_mensagens_usuario in list_sync.values():
+        for mensagem in lista_mensagens_usuario:
+            # Remover a chave 'id_list'
+            mensagem_sem_id_list = {k: v for k, v in mensagem.items() if k != 'id_list'}
 
+            # Utilizar uma tupla (time, id) como chave para garantir ordenação desejada
+            chave = (mensagem_sem_id_list['time'], mensagem_sem_id_list['id'])
+            if chave not in mensagens_unicas:
+                mensagens_unicas[chave] = mensagem_sem_id_list
 
+    # Ordenar a lista de mensagens pela tupla (time, id)
+    lista_mensagens = sorted(mensagens_unicas.values(), key=lambda x: (x['time'], x['id']))
 
-def get_my_latest_id(list_messages):
-    last_id = False
+    return lista_mensagens
 
-    if (len(list_messages) > 0):
-        last_id = list_messages[-1]['index']
-            
-    return last_id
+# Chamando a função para extrair e ordenar mensagens únicas, removendo 'id_list'
+lista_mensagens = extrair_e_ordenar_mensagens(list_sync)
 
-x = get_my_latest_id(mi_redes)
-print(x)
+# Exibindo o resultado
+print(lista_mensagens)

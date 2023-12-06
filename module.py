@@ -97,15 +97,31 @@ def send_message_list(message_list, my_info, data_users, id_list):
     finally:
         client_socket.close()
 
-def recv_message_list(dataObj, client_address, list_sync):
+def recv_message_list(dataObj, dict_sync):
     try:
-        
-        list_sync.append()
+        id_list = dataObj['id_list']
 
-        print("dataObj: ", dataObj)
-        print("client_address: ", client_address)   
-        print("\n\n")
+        if id_list in dict_sync:
+            dict_sync[id_list].append(dataObj)
+        else:
+            dict_sync[id_list] = [dataObj]
+        
+
 
     except KeyboardInterrupt:
         print("Servidor encerrado pelo usuário.")
 
+
+def extrair_e_ordenar_mensagens(list_sync):
+    lista_mensagens = []
+
+    for lista_mensagens_usuario in list_sync.values():
+        for mensagem in lista_mensagens_usuario:
+            # Remover a chave 'id_list'
+            mensagem_sem_id_list = {k: v for k, v in mensagem.items() if k != 'id_list'}
+            lista_mensagens.append(mensagem_sem_id_list)
+
+    # Ordenar a lista de mensagens pelo campo "time"
+    lista_mensagens = sorted(lista_mensagens, key=lambda x: x['time'])
+
+    return lista_mensagens
