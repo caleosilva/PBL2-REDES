@@ -59,13 +59,9 @@ processá-las.
 def handle_request(message_queue, clock):
     while True:
         message = message_queue.get()
-        # print(f"Processing: {message['msg']} at Lamport time {message['time']}")
-        print("handle_request: ", message, '\n\n')
 
         try:
             if message['type'] == 'msg':
-                print("Vou atualizar no handle_request['msg']. Valor atual: ", clock.value)
-
                 clock.update(message['time'])
                 module.handle_mensagem(message, mi_redes, my_info)
             elif message['type'] == 'sync_clock':
@@ -105,7 +101,6 @@ def write_prepare_message(clock):
             # Envie a mensagem para outros usuários
             module.send_message(objMsg, my_info, data_users)
 
-            print("Vou atualizar no write_prepare_message. Valor atual: ", clock.value)
             # Atualiza o relógio
             clock.increment()
             
@@ -115,10 +110,6 @@ def sync_messages():
     # 2- Receber a lista de todos
     # 3- Unir as listas
     pass
-
-
-
-
 
 
 '''
