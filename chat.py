@@ -51,11 +51,13 @@ processá-las.
 def handle_request(message_queue, clock, dict_sync_queue, mi_redes, my_info, data_users):
     while True:
         message = message_queue.get()
-        # print("\nhandle_request: ", message, '\n')
+        print("\nhandle_request: \n", message, '\n\n')
 
         try:
             if message['type'] == 'msg':
                 clock.update(message['time'])
+                print("Clock atual: ", clock.value) #################################################
+
                 module.handle_mensagem(message, mi_redes, my_info)
             elif message['type'] == 'sync_clock':
                 objIndentificador = {'type': 'sync_clock_response', 'time': clock.value, 'sender': my_info}
@@ -63,10 +65,10 @@ def handle_request(message_queue, clock, dict_sync_queue, mi_redes, my_info, dat
             elif message['type'] == 'sync_clock_response':
                 module.sync_clock(clock, message)
             elif message['type'] == 'sync_list_request':
+                print("\nVou mandar minha lista\n")
                 module.send_message_list(mi_redes, my_info, data_users)
             elif message['type'] == 'sync_list_response':
                 dict_sync_queue.put(message)
-
         except Exception as e:
             print("Erro ao lidar com o request:", e)
 
@@ -103,23 +105,30 @@ def write_prepare_message(clock, mi_redes, my_info, data_users):
             # Envie a mensagem para outros usuários
             module.send_message(objMsg, my_info, data_users)
 
+            print("Clock atual: ", clock.value) #################################################
+
+
+
 
 def receive_dict_sync(dict_sync_queue, mi_redes, my_info):
     
     dict_sync = {}
 
-    # lista do proprio usuário:
-    if (len(mi_redes) > 0):
-        my_id_lista = 111111111111
-        size_list = len(dict_sync)
-        for message in mi_redes:
-            objFormatado = {'id_list': my_id_lista, 'size': size_list, 'type': 'sync_list_response', 'body': message}
-            if my_id_lista in dict_sync:
-                dict_sync[my_id_lista].append(objFormatado)
-            else:
-                dict_sync[my_id_lista] = [objFormatado]
+    
 
     while True:
+        # lista do proprio usuário:
+        if (len(mi_redes) > 0):
+            my_id_lista = 111111111111
+            size_list = len(dict_sync)
+            for message in mi_redes:
+                objFormatado = {'id_list': my_id_lista, 'size': size_list, 'type': 'sync_list_response', 'body': message}
+                if my_id_lista in dict_sync:
+                    dict_sync[my_id_lista].append(objFormatado)
+                else:
+                    dict_sync[my_id_lista] = [objFormatado]
+
+
         item_dict = dict_sync_queue.get()
 
         id_list = item_dict['id_list']
@@ -133,8 +142,11 @@ def receive_dict_sync(dict_sync_queue, mi_redes, my_info):
 
         # Falta comparar com sua prórpia lista
         if (verificacao):
+            print("TO ATUALIZANDO MINHA LISTA NO receive_dict_sync")
+
             new_list = module.extrair_e_ordenar_mensagens(dict_sync)
-            mi_redes = new_list
+            mi_redes.clear()
+            mi_redes.extend(new_list)
             module.show_messages(mi_redes, my_info)
             dict_sync.clear()
 
