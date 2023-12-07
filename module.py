@@ -2,6 +2,8 @@ import os
 import json
 import socket
 import uuid
+import random
+
 
 
 '''
@@ -40,7 +42,7 @@ def send_message(objMsg, my_info, data_users):
                 print(e)
 
 def show_messages(group_messages, my_info):
-    # clear_screen()
+    clear_screen()
 
     print('--------------------------------------------------')
     print('|                   MI - REDES                   |')
@@ -79,25 +81,28 @@ def sync_clock(clock, info):
 
 
 
+def send_message_list(message_list, my_info, data_users):
+    
+    if (len(message_list) > 0):
+        id_lista = ''.join(str(random.randint(1, 100)) for _ in range(6))
 
+        try:
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            size_list = len(message_list)
 
-def send_message_list(message_list, my_info, data_users, id_list):
-    try:
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        size_list = len(message_list)
+            for user in data_users:
+                if my_info['port'] != user['port'] and my_info['nome'] != user['nome']:
+                    for objMsg in message_list:
+                        objFormatado = {'id_list': id_lista, 'size': size_list, 'type': 'sync_list_response', 'body': objMsg}
+                        # print("Vou mandar agr para ", (user['host'], user['port']))
+                        client_socket.sendto(json.dumps(objFormatado).encode(), (user['host'], user['port']))
+                        
+        except Exception as e:
+            print("Erro durante o envio:", e)
+        finally:
+            client_socket.close()
 
-        for user in data_users:
-            if my_info['port'] != user['port'] and my_info['nome'] != user['nome']:
-                for objMsg in message_list:
-                    objFormatado = {'id_list': id_list, 'size': size_list, 'type': 'sync_list', 'body': objMsg}
-                    client_socket.sendto(json.dumps(objFormatado).encode(), (user['host'], user['port']))
-                    
-    except Exception as e:
-        print("Erro durante o envio:", e)
-    finally:
-        client_socket.close()
-
-def recv_message_list(dataObj, dict_sync):
+def organize_message_dict(dataObj, dict_sync):
     try:
         id_list = dataObj['id_list']
 
@@ -105,23 +110,36 @@ def recv_message_list(dataObj, dict_sync):
             dict_sync[id_list].append(dataObj)
         else:
             dict_sync[id_list] = [dataObj]
-        
-
-
     except KeyboardInterrupt:
         print("Servidor encerrado pelo usuário.")
 
+def check_full_dict(list_sync):
+    completo = True
+    for chave, lista_mensagens in list_sync.items():
+        tamanho_atual = len(lista_mensagens)
+        tamanho_total = lista_mensagens[0].get('size', 0)
+
+        if tamanho_atual != tamanho_total:
+            completo = False
+
+    return completo
+
 
 def extrair_e_ordenar_mensagens(list_sync):
-    lista_mensagens = []
+    # Dicionário para garantir mensagens únicas
+    mensagens_unicas = {}
 
     for lista_mensagens_usuario in list_sync.values():
         for mensagem in lista_mensagens_usuario:
             # Remover a chave 'id_list'
             mensagem_sem_id_list = {k: v for k, v in mensagem.items() if k != 'id_list'}
-            lista_mensagens.append(mensagem_sem_id_list)
 
-    # Ordenar a lista de mensagens pelo campo "time"
-    lista_mensagens = sorted(lista_mensagens, key=lambda x: x['time'])
+            # Utilizar uma tupla (time, id) como chave para garantir ordenação desejada
+            chave = (mensagem_sem_id_list['body']['time'], mensagem_sem_id_list['body']['id'])
+            if chave not in mensagens_unicas:
+                mensagens_unicas[chave] = mensagem_sem_id_list['body']
+
+    # Ordenar a lista de mensagens pela tupla (time, id)
+    lista_mensagens = sorted(mensagens_unicas.values(), key=lambda x: (x['time'], x['id']))
 
     return lista_mensagens
