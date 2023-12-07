@@ -31,6 +31,7 @@ def responde_message(objMsg, my_info, info_user):
             client_socket.sendto(json.dumps(objMsg).encode(), (info_user['host'], info_user['port']))
         except Exception as e:
             print(e)
+    client_socket.close()
 
 def send_message(objMsg, my_info, data_users):
     try:
@@ -46,7 +47,7 @@ def send_message(objMsg, my_info, data_users):
         client_socket.close()
 
 def show_messages(group_messages, my_info):
-    clear_screen()
+    # clear_screen()
 
     print('--------------------------------------------------')
     print('|                   MI - REDES                   |')
@@ -85,6 +86,7 @@ def sync_clock(clock, info):
 
 
 def send_message_list(message_list, my_info, data_users):
+    print("mandar lista de tamanho: ", len(message_list))
     if len(message_list) > 0:
         id_lista = ''.join(str(random.randint(1, 100)) for _ in range(6))
 

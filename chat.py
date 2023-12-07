@@ -56,12 +56,11 @@ def handle_request(message_queue, clock, dict_sync_queue, mi_redes, my_info, dat
         try:
             if message['type'] == 'msg':
                 clock.update(message['time'])
-                print("Clock atual: ", clock.value) #################################################
-
                 module.handle_mensagem(message, mi_redes, my_info)
             elif message['type'] == 'sync_clock':
                 objIndentificador = {'type': 'sync_clock_response', 'time': clock.value, 'sender': my_info}
                 module.responde_message(objIndentificador, my_info, message['sender'])
+                print("mandei")
             elif message['type'] == 'sync_clock_response':
                 module.sync_clock(clock, message)
             elif message['type'] == 'sync_list_request':
@@ -79,9 +78,10 @@ def ask_sync_clock_and_list(clock, my_info, data_users):
     objIndentificador = {'type': 'sync_clock', 'time': clock.value, 'sender': my_info}
     confirmacao = module.send_message(objIndentificador, my_info, data_users)
 
-    if (confirmacao):
-        objIndentificadorLista = {'type': 'sync_list_request', 'sender': my_info}
-        module.send_message(objIndentificadorLista, my_info, data_users)
+    # time.sleep(1)
+    # if confirmacao:
+    #     objIndentificadorLista = {'type': 'sync_list_request', 'sender': my_info}
+    #     module.send_message(objIndentificadorLista, my_info, data_users)
 
 '''
 Função que roda em uma thread e é responsável por controlar as mensagens de um usuário, mandando 
@@ -105,22 +105,14 @@ def write_prepare_message(clock, mi_redes, my_info, data_users):
             # Envie a mensagem para outros usuários
             module.send_message(objMsg, my_info, data_users)
 
-            print("Clock atual: ", clock.value) #################################################
-
-
-
 
 def receive_dict_sync(dict_sync_queue, mi_redes, my_info):
-    
+    # 'time': clock.value, 'id': id_message, 'msg': mensagem, 'sender': my_info
     dict_sync = {}
-
-    
-
     while True:
 
         item_dict = dict_sync_queue.get()
-
-        
+        print("item_dict: ", item_dict)
 
         # lista do proprio usuário:
         if (len(mi_redes) > 0):
@@ -145,7 +137,10 @@ def receive_dict_sync(dict_sync_queue, mi_redes, my_info):
         # module.organize_message_dict(item_dict, dict_sync)
         verificacao = module.check_full_dict(dict_sync)
 
-        # Falta comparar com sua prórpia lista
+        # print("Verificação: ", verificacao)
+        # print("dict_sync: \n", dict_sync, '\n-----------------')
+
+        # # Falta comparar com sua prórpia lista
         if (verificacao):
             print("TO ATUALIZANDO MINHA LISTA NO receive_dict_sync")
 
@@ -204,8 +199,8 @@ def start(mi_redes, my_info, data_users):
     sync_clock_and_list_thread = threading.Thread(target=ask_sync_clock_and_list, args=(clock, my_info, data_users))
     sync_clock_and_list_thread.start()
 
-    receive_dict_sync_thread = threading.Thread(target=receive_dict_sync, args=(dict_sync_queue, mi_redes, my_info))
-    receive_dict_sync_thread.start()
+    # receive_dict_sync_thread = threading.Thread(target=receive_dict_sync, args=(dict_sync_queue, mi_redes, my_info))
+    # receive_dict_sync_thread.start()
 
     server_thread = threading.Thread(target=server, args=(message_queue, my_info))
     server_thread.start()
