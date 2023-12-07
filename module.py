@@ -33,16 +33,20 @@ def responde_message(objMsg, my_info, info_user):
             print(e)
 
 def send_message(objMsg, my_info, data_users):
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    for user in data_users:
-        if (my_info['port'] != user['port'] and my_info['nome'] != user['nome']):
-            try:
-                client_socket.sendto(json.dumps(objMsg).encode(), (user['host'], user['port']))
-            except Exception as e:
-                print(e)
+    try:
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        for user in data_users:
+            if (my_info['port'] != user['port'] and my_info['nome'] != user['nome']):
+                try:
+                    client_socket.sendto(json.dumps(objMsg).encode(), (user['host'], user['port']))
+                except Exception as e:
+                    print(e)
+        return True
+    finally:
+        client_socket.close()
 
 def show_messages(group_messages, my_info):
-    # clear_screen()
+    clear_screen()
 
     print('--------------------------------------------------')
     print('|                   MI - REDES                   |')
@@ -88,8 +92,6 @@ def send_message_list(message_list, my_info, data_users):
         try:
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             size_list = len(message_list)
-
-            print(f"Sending list with id {id_lista} to other users.")
             
             for user in data_users:
                 if my_info['port'] != user['port'] and my_info['nome'] != user['nome']:
@@ -97,7 +99,6 @@ def send_message_list(message_list, my_info, data_users):
                         objFormatado = {'id_list': id_lista, 'size': size_list, 'type': 'sync_list_response', 'body': objMsg}
                         objJson = json.dumps(objFormatado)
                         client_socket.sendto(objJson.encode(), (user['host'], user['port']))
-                        print(f"Sent to {user['nome']}: {objJson}")
                     print("\n")
 
         except Exception as e:

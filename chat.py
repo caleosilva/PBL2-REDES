@@ -66,7 +66,6 @@ def handle_request(message_queue, clock, dict_sync_queue, mi_redes, my_info, dat
                 module.send_message_list(mi_redes, my_info, data_users)
             elif message['type'] == 'sync_list_response':
                 dict_sync_queue.put(message)
-                print(f"Adicionei a mensagem na fila: {message}")
 
         except Exception as e:
             print("Erro ao lidar com o request:", e)
@@ -75,11 +74,12 @@ def handle_request(message_queue, clock, dict_sync_queue, mi_redes, my_info, dat
 Função que roda em uma thread e é responsável sincronizar o relógio com todos os usuários online.
 '''
 def ask_sync_clock_and_list(clock, my_info, data_users):
-    objIndentificadorLista = {'type': 'sync_list_request', 'sender': my_info}
-    module.send_message(objIndentificadorLista, my_info, data_users)
-
     objIndentificador = {'type': 'sync_clock', 'time': clock.value, 'sender': my_info}
-    module.send_message(objIndentificador, my_info, data_users)
+    confirmacao = module.send_message(objIndentificador, my_info, data_users)
+
+    if (confirmacao):
+        objIndentificadorLista = {'type': 'sync_list_request', 'sender': my_info}
+        module.send_message(objIndentificadorLista, my_info, data_users)
 
 '''
 Função que roda em uma thread e é responsável por controlar as mensagens de um usuário, mandando 
