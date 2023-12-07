@@ -117,6 +117,11 @@ def receive_dict_sync(dict_sync_queue, mi_redes, my_info):
     
 
     while True:
+
+        item_dict = dict_sync_queue.get()
+
+        
+
         # lista do proprio usuário:
         if (len(mi_redes) > 0):
             my_id_lista = 111111111111
