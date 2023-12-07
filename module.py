@@ -42,7 +42,7 @@ def send_message(objMsg, my_info, data_users):
                 print(e)
 
 def show_messages(group_messages, my_info):
-    clear_screen()
+    # clear_screen()
 
     print('--------------------------------------------------')
     print('|                   MI - REDES                   |')
@@ -80,27 +80,31 @@ def sync_clock(clock, info):
 
 
 
-
+# Não envia sempre.
 def send_message_list(message_list, my_info, data_users):
-    
-    if (len(message_list) > 0):
+    if len(message_list) > 0:
         id_lista = ''.join(str(random.randint(1, 100)) for _ in range(6))
 
         try:
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             size_list = len(message_list)
 
+            print(f"Sending list with id {id_lista} to other users.")
+            
             for user in data_users:
                 if my_info['port'] != user['port'] and my_info['nome'] != user['nome']:
                     for objMsg in message_list:
                         objFormatado = {'id_list': id_lista, 'size': size_list, 'type': 'sync_list_response', 'body': objMsg}
-                        # print("Vou mandar agr para ", (user['host'], user['port']))
-                        client_socket.sendto(json.dumps(objFormatado).encode(), (user['host'], user['port']))
-                        
+                        objJson = json.dumps(objFormatado)
+                        client_socket.sendto(objJson.encode(), (user['host'], user['port']))
+                        print(f"Sent to {user['nome']}: {objJson}")
+                    print("\n")
+
         except Exception as e:
-            print("Erro durante o envio:", e)
+            print("Error during sending:", e)
         finally:
             client_socket.close()
+
 
 def organize_message_dict(dataObj, dict_sync):
     try:
@@ -124,22 +128,16 @@ def check_full_dict(list_sync):
 
     return completo
 
-
 def extrair_e_ordenar_mensagens(list_sync):
-    # Dicionário para garantir mensagens únicas
     mensagens_unicas = {}
 
     for lista_mensagens_usuario in list_sync.values():
         for mensagem in lista_mensagens_usuario:
-            # Remover a chave 'id_list'
             mensagem_sem_id_list = {k: v for k, v in mensagem.items() if k != 'id_list'}
 
-            # Utilizar uma tupla (time, id) como chave para garantir ordenação desejada
             chave = (mensagem_sem_id_list['body']['time'], mensagem_sem_id_list['body']['id'])
             if chave not in mensagens_unicas:
                 mensagens_unicas[chave] = mensagem_sem_id_list['body']
 
-    # Ordenar a lista de mensagens pela tupla (time, id)
-    lista_mensagens = sorted(mensagens_unicas.values(), key=lambda x: (x['time'], x['id']))
+    return sorted(mensagens_unicas.values(), key=lambda x: (x['time'], x['id']))
 
-    return lista_mensagens

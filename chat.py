@@ -10,14 +10,6 @@ from queue import Queue
 '''
 Variávis de controle do código.
 '''
-HOST_LISTEN = "127.0.0.1"
-data_users = [
-    {"host": HOST_LISTEN, "port": 1111, "nome": "jose"},
-    {"host": HOST_LISTEN, "port": 2222, "nome": "maria"},
-    {"host": HOST_LISTEN, "port": 3333, "nome": "rebeca"}
-]
-my_info = {'host': HOST_LISTEN, 'port': '', 'nome': ''}
-mi_redes = []
 
 
 '''
@@ -38,19 +30,17 @@ class LamportClock:
             self.value = max(self.value, received_time) + 1
             return self.value
 
-
 '''
 Função que roda em uma thread e é responsável por receber as mensagens e colocá-las em uma fila 
 a fim de serem processadas.
 '''
-def server(message_queue):
+def server(message_queue, my_info):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_adress = (my_info['host'], my_info['port'])
     server_socket.bind(server_adress)
 
     while True:
         data, client_address = server_socket.recvfrom(1024)
-        # print("data no server: ", data, '\n\n')
         dataObj = json.loads(data)
         message_queue.put(dataObj)
 
@@ -58,10 +48,9 @@ def server(message_queue):
 Função que roda em uma thread e é responsável por pegar as solicitações da fila e
 processá-las.
 '''
-def handle_request(message_queue, clock, dict_sync_queue):
+def handle_request(message_queue, clock, dict_sync_queue, mi_redes, my_info, data_users):
     while True:
         message = message_queue.get()
-
         # print("\nhandle_request: ", message, '\n')
 
         try:
@@ -74,11 +63,10 @@ def handle_request(message_queue, clock, dict_sync_queue):
             elif message['type'] == 'sync_clock_response':
                 module.sync_clock(clock, message)
             elif message['type'] == 'sync_list_request':
-                print("Recebi o pedido de envio da minha lista")
                 module.send_message_list(mi_redes, my_info, data_users)
             elif message['type'] == 'sync_list_response':
                 dict_sync_queue.put(message)
-                # print("Adicionei a msg na fila")
+                print(f"Adicionei a mensagem na fila: {message}")
 
         except Exception as e:
             print("Erro ao lidar com o request:", e)
@@ -86,20 +74,18 @@ def handle_request(message_queue, clock, dict_sync_queue):
 '''
 Função que roda em uma thread e é responsável sincronizar o relógio com todos os usuários online.
 '''
-def ask_sync_clock_and_list(clock):
+def ask_sync_clock_and_list(clock, my_info, data_users):
     objIndentificadorLista = {'type': 'sync_list_request', 'sender': my_info}
     module.send_message(objIndentificadorLista, my_info, data_users)
 
     objIndentificador = {'type': 'sync_clock', 'time': clock.value, 'sender': my_info}
     module.send_message(objIndentificador, my_info, data_users)
 
-
-
 '''
 Função que roda em uma thread e é responsável por controlar as mensagens de um usuário, mandando 
 para os demais e adicionando em sua lista.
 '''
-def write_prepare_message(clock):
+def write_prepare_message(clock, mi_redes, my_info, data_users):
     while True:
         mensagem = input("")
 
@@ -118,15 +104,21 @@ def write_prepare_message(clock):
             module.send_message(objMsg, my_info, data_users)
 
 
-
-# def send_messageList_sync(my_list):
-#     id_lista = ''.join(str(random.randint(1, 100)) for _ in range(6))
-#     module.send_message_list(my_list, my_info, data_users, id_lista)
-
-# falta adicionar a propria lista a isso
-def receive_dict_sync(dict_sync_queue):
+def receive_dict_sync(dict_sync_queue, mi_redes, my_info):
     
     dict_sync = {}
+
+    # lista do proprio usuário:
+    if (len(mi_redes) > 0):
+        my_id_lista = 111111111111
+        size_list = len(dict_sync)
+        for message in mi_redes:
+            objFormatado = {'id_list': my_id_lista, 'size': size_list, 'type': 'sync_list_response', 'body': message}
+            if my_id_lista in dict_sync:
+                dict_sync[my_id_lista].append(objFormatado)
+            else:
+                dict_sync[my_id_lista] = [objFormatado]
+
     while True:
         item_dict = dict_sync_queue.get()
 
@@ -153,6 +145,15 @@ def receive_dict_sync(dict_sync_queue):
 Função responsável por identificar o usuário e realizar o "LOGIN".
 '''
 def main():
+    HOST_LISTEN = "127.0.0.1"
+    data_users = [
+        {"host": HOST_LISTEN, "port": 1111, "nome": "jose"},
+        {"host": HOST_LISTEN, "port": 2222, "nome": "maria"},
+        {"host": HOST_LISTEN, "port": 3333, "nome": "rebeca"}
+    ]
+    my_info = {'host': HOST_LISTEN, 'port': '', 'nome': ''}
+    mi_redes = []
+
     print('-=-=-=-= BEM VINDO =-=-=-=-\n\n')
 
     print('[1] -> Login')
@@ -167,7 +168,7 @@ def main():
         my_info['nome'] = nome
 
         
-        start()
+        start(mi_redes, my_info, data_users)
         module.show_messages(mi_redes, my_info)
 
     elif opc == '2':
@@ -176,24 +177,26 @@ def main():
 '''
 Função responsável por instanciar os objetos e iniciar as threads.
 '''
-def start():
+def start(mi_redes, my_info, data_users):
+    
+
     clock = LamportClock()
     message_queue = Queue()
     dict_sync_queue = Queue()
 
-    sync_clock_and_list_thread = threading.Thread(target=ask_sync_clock_and_list, args=(clock,))
+    sync_clock_and_list_thread = threading.Thread(target=ask_sync_clock_and_list, args=(clock, my_info, data_users))
     sync_clock_and_list_thread.start()
 
-    receive_dict_sync_thread = threading.Thread(target=receive_dict_sync, args=(dict_sync_queue,))
+    receive_dict_sync_thread = threading.Thread(target=receive_dict_sync, args=(dict_sync_queue, mi_redes, my_info))
     receive_dict_sync_thread.start()
 
-    server_thread = threading.Thread(target=server, args=(message_queue,))
+    server_thread = threading.Thread(target=server, args=(message_queue, my_info))
     server_thread.start()
 
-    handle_request_thread = threading.Thread(target=handle_request, args=(message_queue, clock, dict_sync_queue))
+    handle_request_thread = threading.Thread(target=handle_request, args=(message_queue, clock, dict_sync_queue, mi_redes, my_info, data_users))
     handle_request_thread.start()
 
-    write_prepare_message_thread = threading.Thread(target=write_prepare_message, args=(clock,))
+    write_prepare_message_thread = threading.Thread(target=write_prepare_message, args=(clock, mi_redes, my_info, data_users))
     write_prepare_message_thread.start()
 
 if __name__ == "__main__":
