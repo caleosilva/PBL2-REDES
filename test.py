@@ -12,43 +12,21 @@ list_sync = {
     }
 
 
+def criptografar(frase):
+    mensagem = ""
+    for i in frase:
+        mensagem += chr (ord(i) + 5)
+    return mensagem
+
+def descriptografar(mensagem):
+    frase = ""
+    for i in mensagem:
+        frase += chr (ord(i) - 5)
+    return frase
 
 
+x = criptografar("Meu nome é Caleo")
+print(x)
 
-def extrair_e_ordenar_mensagens(list_sync):
-    # Dicionário para garantir mensagens únicas
-    mensagens_unicas = {}
+print(descriptografar(x))
 
-    for lista_mensagens_usuario in list_sync.values():
-        for mensagem in lista_mensagens_usuario:
-            # Remover a chave 'id_list'
-            mensagem_sem_id_list = {k: v for k, v in mensagem.items() if k != 'id_list'}
-
-            # Utilizar uma tupla (time, id) como chave para garantir ordenação desejada
-            chave = (mensagem_sem_id_list['body']['time'], mensagem_sem_id_list['body']['id'])
-            if chave not in mensagens_unicas:
-                mensagens_unicas[chave] = mensagem_sem_id_list['body']
-
-    # Ordenar a lista de mensagens pela tupla (time, id)
-    lista_mensagens = sorted(mensagens_unicas.values(), key=lambda x: (x['time'], x['id']))
-
-    return lista_mensagens
-
-# lista_mensagens = extrair_e_ordenar_mensagens(list_sync)
-# print(lista_mensagens)
-
-
-
-def check_full_dict(list_sync):
-    completo = True
-    for chave, lista_mensagens in list_sync.items():
-        tamanho_atual = len(lista_mensagens)
-        tamanho_total = lista_mensagens[0].get('size', 0)
-
-        if tamanho_atual != tamanho_total:
-            completo = False
-
-    return completo
-
-verificacao = check_full_dict (list_sync)
-print(verificacao)

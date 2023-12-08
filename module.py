@@ -40,17 +40,18 @@ def send_message(objMsg, my_info, data_users):
         client_socket.close()
 
 def show_messages(group_messages, my_info):
-    # clear_screen()
+    clear_screen()
+    print(group_messages, '\n')
     print('--------------------------------------------------')
     print('|                   MI - REDES                   |')
     print('--------------------------------------------------\n\n')
     for dicionarioMensagem in group_messages:
         if (dicionarioMensagem['sender']['host'] == my_info['host'] and dicionarioMensagem['sender']['port'] == my_info['port']):
             print(
-                f'\t\t({dicionarioMensagem["time"]}) {dicionarioMensagem["sender"]["nome"]} -> {dicionarioMensagem["msg"]}\n')
+                f'\t\t({dicionarioMensagem["time"]}) {dicionarioMensagem["sender"]["nome"]} -> {descriptografar(dicionarioMensagem["msg"])}\n')
         else:
             print(
-                f'({dicionarioMensagem["time"]}) {dicionarioMensagem["sender"]["nome"]} -> {dicionarioMensagem["msg"]}\n')
+                f'({dicionarioMensagem["time"]}) {dicionarioMensagem["sender"]["nome"]} -> {descriptografar(dicionarioMensagem["msg"])}\n')
 
 def handle_mensagem(objMsg, lista_mensagens, my_info):
     copia = (objMsg.copy())
@@ -82,3 +83,14 @@ def send_message_list(message_list, my_info, data_users):
         finally:
             client_socket.close() 
 
+def criptografar(frase):
+    mensagem = ""
+    for i in frase:
+        mensagem += chr (ord(i) + 5)
+    return mensagem
+
+def descriptografar(mensagem):
+    frase = ""
+    for i in mensagem:
+        frase += chr (ord(i) - 5)
+    return frase

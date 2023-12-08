@@ -46,7 +46,6 @@ processá-las.
 def handle_request(message_queue, clock, dict_sync_queue, mi_redes, my_info, data_users):
     while True:
         message = message_queue.get()
-        print("handle_request: \n", message)
         try:
             if message['type'] == 'msg':
                 clock.update(message['time'])
@@ -83,7 +82,7 @@ def write_prepare_message(clock, mi_redes, my_info, data_users):
         mensagem = input("")
         if (mensagem != ""):
             clock.increment()
-            objMsg = {'type': 'msg', 'time': clock.value, 'id': module.generete_id(), 'msg': mensagem, 'sender': my_info}
+            objMsg = {'type': 'msg', 'time': clock.value, 'id': module.generete_id(), 'msg': module.criptografar(mensagem), 'sender': my_info}
             module.handle_mensagem(objMsg, mi_redes, my_info)
             module.send_message(objMsg, my_info, data_users)
 
