@@ -81,7 +81,7 @@ O software desenvolvido opera com base em seis Threads distintas, cada uma desem
 5. **write_prepare_message_thread**: Como sugere o nome, esta Thread se encarrega de capturar as mensagens escritas pelo usuário e prepará-las para serem enviadas aos demais, garantindo a eficiência na comunicação.
 6. **sync_active_thread**: Por fim, a última Thread iniciada é responsável por realizar a sincronização a cada 10 segundos das mensagens entre todos os usuários ativos, contribuindo para uma experiência contínua e atualizada.
 
-### Criptografia
+### 2.4 - Criptografia
 
 A estratégia de criptografia adotada neste sistema é baseada em um método simples conhecido como deslocamento fixo, onde cada caractere na mensagem original é substituído por outro caractere que se encontra a uma distância fixa no alfabeto. Essa distância é representada por uma constante denominada SHIFT_AMOUNT que pode ser alterada para cada grupo ou conversa.
 
