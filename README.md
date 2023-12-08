@@ -94,7 +94,11 @@ No entanto, essa simplicidade vem com algumas desvantagens significativas. A vul
 
 # 3. Resultados
 
-bla bla bla
+Ao iniciar o sistema, o usuário é recepcionado por um menu de login simples e intuitivo, estabelecendo uma entrada facilitada ao ambiente de comunicação. Após concluir o login, é imediatamente direcionado ao grupo específico ao qual está vinculado. Importante ressaltar que, embora o sistema possa oferecer múltiplas conversas, atualmente, apenas um grupo está cadastrado, sendo este automaticamente acessado após o login.
+
+Ao adentrar o grupo, todas as sincronizações necessárias são efetuadas, garantindo a recepção das mensagens trocadas durante períodos offline. Em um ambiente distribuído, mesmo quando online, a cada 10 segundos cada usuário compartilha sua lista de mensagens, assegurando que todos possuam a versão completa da conversa.
+
+Destacamos o compromisso com a robustez e segurança no desenvolvimento do sistema. Tratamento adequado de todos os possíveis erros e exceções assegura a estabilidade das operações, contribuindo para a experiência positiva dos funcionários. Qualquer intercorrência, como falhas na comunicação, é identificada e tratada de maneira eficaz, proporcionando feedback claro e útil aos usuários. Em síntese, o sistema não apenas oferece uma interface amigável para comunicação, mas também reforça a segurança e privacidade de todos os envolvidos.
 
 # 4. Conclusão
 
