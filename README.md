@@ -98,7 +98,11 @@ bla bla bla
 
 # 4. Conclusão
 
-bla bla bla
+Durante a conclusão deste projeto, alcançamos insights valiosos sobre a complexa interconexão de sistemas distribuídos, destacando-se a complexidade inerente à sincronização desses sistemas. Exploramos de forma aprofundada a dinâmica da comunicação UDP, enriquecendo nossos conhecimentos em diversas áreas da arquitetura de sistemas distribuídos.
+
+É gratificante observar que todos os requisitos estabelecidos foram plenamente atendidos, demonstrando a eficiência do sistema implementado. A correta ordenação das mensagens no ambiente distribuído foi assegurada, assim como a sincronização adequada das mensagens, mesmo aquelas enviadas durante períodos offline do usuário. Ademais, as mensagens possuem uma camada de criptografia, assegurando a privacidade do usuário.
+
+Olhando para o futuro do projeto, identificamos uma área passível de aprimoramento: o sistema de criptografia. Aprimorar esse aspecto seria uma opção válida, visando fortalecer ainda mais a privacidade dos usuários do sistema, garantindo uma camada adicional de segurança às suas comunicações. Essa evolução potencial contribuiria para consolidar o projeto como uma solução robusta e confiável no cenário de sistemas distribuídos.
 
 # Referências
 
@@ -106,28 +110,3 @@ Python threading module: Disponível em: https://docs.python.org/3/library/threa
 
 HUNT, John; HUNT, John. Sockets in Python. Advanced Guide to Python 3 Programming, p. 457-470, 2019.
 
-
-
-----------------------------------------------
-
-6 - threads:
-- ask_sync_clock_and_list
-- receive_dict_sync
-- server
-- handle_request
-- write_prepare_message
-- sync_active
-
-Envio dos pacotes no formato:
-type: n diferentes 
-{...}
-
-Sincronização:
-Relógio de lamport
-A cada 10 seg as listas são trocadas
-
-Login
-Como é feito?
-
-Criptografia:
-Simples, falhas
