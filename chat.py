@@ -3,7 +3,6 @@ import socket
 import threading
 import json
 import time
-import random
 from queue import Queue
 
 
@@ -86,7 +85,9 @@ def write_prepare_message(clock, mi_redes, my_info, data_users):
             module.handle_mensagem(objMsg, mi_redes, my_info)
             module.send_message(objMsg, my_info, data_users)
 
-
+'''
+Função que roda em uma thread e é responsável por receber e tratar as mensagens de sincronização.
+'''
 def receive_dict_sync(dict_sync_queue, mi_redes, my_info, clock):    
     while True:
         item_dict = dict_sync_queue.get()
@@ -98,6 +99,9 @@ def receive_dict_sync(dict_sync_queue, mi_redes, my_info, clock):
             module.show_messages(mi_redes, my_info)
             module.fix_uknown_error_sync(mi_redes, clock)
 
+'''
+Função que roda em uma thread e é responsável por sincronizar as listas a cada 10 segundos
+'''
 def sync_active(mi_redes, my_info, data_users):
     while True:
         if len(mi_redes) > 0:
@@ -105,7 +109,6 @@ def sync_active(mi_redes, my_info, data_users):
             objIndentificadorLista = {'type': 'sync_list_request', 'sender': my_info}
             module.send_message(objIndentificadorLista, my_info, data_users)
             time.sleep(10)
-
 
 '''
 Função responsável por identificar o usuário e realizar o "LOGIN".

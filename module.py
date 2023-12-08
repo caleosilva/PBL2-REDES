@@ -4,9 +4,8 @@ import socket
 import uuid
 import random
 
+
 SHIFT_AMOUNT = 5
-
-
 
 def generete_id():
     return str(uuid.uuid4())
