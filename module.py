@@ -4,6 +4,9 @@ import socket
 import uuid
 import random
 
+SHIFT_AMOUNT = 5
+
+
 
 def generete_id():
     return str(uuid.uuid4())
@@ -41,7 +44,6 @@ def send_message(objMsg, my_info, data_users):
 
 def show_messages(group_messages, my_info):
     clear_screen()
-    print(group_messages, '\n')
     print('--------------------------------------------------')
     print('|                   MI - REDES                   |')
     print('--------------------------------------------------\n\n')
@@ -66,7 +68,6 @@ def is_duplicate_message(id_obj, message_list):
     return False
 
 def send_message_list(message_list, my_info, data_users):
-    print("mandar lista de tamanho: ", len(message_list))
     if len(message_list) > 0:
         id_lista = ''.join(str(random.randint(1, 100)) for _ in range(6))
         try:
@@ -86,11 +87,16 @@ def send_message_list(message_list, my_info, data_users):
 def criptografar(frase):
     mensagem = ""
     for i in frase:
-        mensagem += chr (ord(i) + 5)
+        mensagem += chr (ord(i) + SHIFT_AMOUNT)
     return mensagem
 
 def descriptografar(mensagem):
     frase = ""
     for i in mensagem:
-        frase += chr (ord(i) - 5)
+        frase += chr (ord(i) - SHIFT_AMOUNT)
     return frase
+
+def fix_uknown_error_sync(message_list, clock):
+    maior_time = max(message_list, key=lambda x: x['time'])
+    clock.update(maior_time['time'])
+

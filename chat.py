@@ -69,9 +69,9 @@ def ask_sync_clock_and_list(clock, my_info, data_users):
     objIndentificador = {'type': 'sync_clock', 'time': clock.value, 'sender': my_info}
     confirmacao = module.send_message(objIndentificador, my_info, data_users)
 
-    # if confirmacao:
-    #     objIndentificadorLista = {'type': 'sync_list_request', 'sender': my_info}
-    #     module.send_message(objIndentificadorLista, my_info, data_users)
+    if confirmacao:
+        objIndentificadorLista = {'type': 'sync_list_request', 'sender': my_info}
+        module.send_message(objIndentificadorLista, my_info, data_users)
 
 '''
 Função que roda em uma thread e é responsável por controlar as mensagens de um usuário, mandando 
@@ -87,7 +87,7 @@ def write_prepare_message(clock, mi_redes, my_info, data_users):
             module.send_message(objMsg, my_info, data_users)
 
 
-def receive_dict_sync(dict_sync_queue, mi_redes, my_info):    
+def receive_dict_sync(dict_sync_queue, mi_redes, my_info, clock):    
     while True:
         item_dict = dict_sync_queue.get()
         new_id = item_dict['body']['id']
@@ -95,7 +95,17 @@ def receive_dict_sync(dict_sync_queue, mi_redes, my_info):
         if (not module.is_duplicate_message(new_id, mi_redes)):
             mi_redes.append(item_dict['body'])
             mi_redes.sort(key=lambda x: (x['time'], x['id']))
-            module.show_messages(mi_redes, my_info)          
+            module.show_messages(mi_redes, my_info)
+            module.fix_uknown_error_sync(mi_redes, clock)
+
+def sync_active(mi_redes, my_info, data_users):
+    while True:
+        if len(mi_redes) > 0:
+            # print("sync_active")
+            objIndentificadorLista = {'type': 'sync_list_request', 'sender': my_info}
+            module.send_message(objIndentificadorLista, my_info, data_users)
+            time.sleep(10)
+
 
 '''
 Função responsável por identificar o usuário e realizar o "LOGIN".
@@ -118,8 +128,10 @@ def main():
     opc = input("-> ")
 
     if opc == '1':
-        port = input("\nDigite a porta: ")
+        host = input("\nDigite o IP: ")
+        port = input("Digite a porta: ")
         nome = input("Digite o nome: ")
+        # my_info['host'] = host
         my_info['port'] = int(port)
         my_info['nome'] = nome
 
@@ -141,7 +153,7 @@ def start(mi_redes, my_info, data_users):
     sync_clock_and_list_thread = threading.Thread(target=ask_sync_clock_and_list, args=(clock, my_info, data_users))
     sync_clock_and_list_thread.start()
 
-    receive_dict_sync_thread = threading.Thread(target=receive_dict_sync, args=(dict_sync_queue, mi_redes, my_info))
+    receive_dict_sync_thread = threading.Thread(target=receive_dict_sync, args=(dict_sync_queue, mi_redes, my_info, clock))
     receive_dict_sync_thread.start()
 
     server_thread = threading.Thread(target=server, args=(message_queue, my_info))
@@ -152,6 +164,9 @@ def start(mi_redes, my_info, data_users):
 
     write_prepare_message_thread = threading.Thread(target=write_prepare_message, args=(clock, mi_redes, my_info, data_users))
     write_prepare_message_thread.start()
+
+    sync_active_thread = threading.Thread(target=sync_active, args=(mi_redes, my_info, data_users))
+    sync_active_thread.start()
 
 if __name__ == "__main__":
     main()
