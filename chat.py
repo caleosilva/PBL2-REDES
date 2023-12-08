@@ -115,9 +115,12 @@ Função responsável por identificar o usuário e realizar o "LOGIN".
 '''
 def main():
     data_users = [
-        {"host": '127.0.0.1', "port": 1111, "nome": "jose"},
-        {"host": '127.0.0.1', "port": 2222, "nome": "maria"},
-        {"host": '127.0.0.1', "port": 3333, "nome": "rebeca"}
+        {"host": '172.16.103.1', "port": 1111, "nome": "Amancio"},
+        {"host": '172.16.103.2', "port": 2222, "nome": "Augusto"},
+        {"host": '172.16.103.3', "port": 3333, "nome": "Joao"},
+        {"host": '172.16.103.4', "port": 4444, "nome": "Maria"},
+        {"host": '172.16.103.5', "port": 5555, "nome": "Leo"}
+
     ]
     my_info = {'host': '', 'port': '', 'nome': ''}
     mi_redes = []
