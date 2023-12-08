@@ -114,13 +114,12 @@ def sync_active(mi_redes, my_info, data_users):
 Função responsável por identificar o usuário e realizar o "LOGIN".
 '''
 def main():
-    HOST_LISTEN = "127.0.0.1"
     data_users = [
-        {"host": HOST_LISTEN, "port": 1111, "nome": "jose"},
-        {"host": HOST_LISTEN, "port": 2222, "nome": "maria"},
-        {"host": HOST_LISTEN, "port": 3333, "nome": "rebeca"}
+        {"host": '127.0.0.1', "port": 1111, "nome": "jose"},
+        {"host": '127.0.0.1', "port": 2222, "nome": "maria"},
+        {"host": '127.0.0.1', "port": 3333, "nome": "rebeca"}
     ]
-    my_info = {'host': HOST_LISTEN, 'port': '', 'nome': ''}
+    my_info = {'host': '', 'port': '', 'nome': ''}
     mi_redes = []
 
     print('-=-=-=-= BEM VINDO =-=-=-=-\n\n')
@@ -131,16 +130,24 @@ def main():
     opc = input("-> ")
 
     if opc == '1':
-        host = input("\nDigite o IP: ")
-        port = input("Digite a porta: ")
-        nome = input("Digite o nome: ")
-        # my_info['host'] = host
-        my_info['port'] = int(port)
-        my_info['nome'] = nome
+        print("\nUsuários:")
+        for i, user in enumerate(data_users):
+            print(f"{i + 1}. {user['nome']} - ({user['host']}:{user['port']})")
 
-        
-        start(mi_redes, my_info, data_users)
-        module.show_messages(mi_redes, my_info)
+        try:
+            escolha = int(input("\nDigite o número correspondente ao usuário desejado: "))
+            if 1 <= escolha <= len(data_users):
+                selected_user = data_users[escolha - 1]
+                my_info['host'] = selected_user['host']
+                my_info['port'] = selected_user['port']
+                my_info['nome'] = selected_user['nome']
+
+                start(mi_redes, my_info, data_users)
+                module.show_messages(mi_redes, my_info)
+            else:
+                print("Escolha inválida. Tente novamente.")
+        except ValueError:
+            print("Entrada inválida. Digite um número.")
 
     elif opc == '2':
         exit()
