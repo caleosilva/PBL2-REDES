@@ -115,16 +115,16 @@ Função responsável por identificar o usuário e realizar o "LOGIN".
 '''
 def main():
     data_users = [
-        {"host": '172.16.103.1', "port": 1111, "nome": "Amancio"},
-        {"host": '172.16.103.2', "port": 2222, "nome": "Augusto"},
-        {"host": '172.16.103.3', "port": 3333, "nome": "Joao"},
-        {"host": '172.16.103.4', "port": 4444, "nome": "Maria"},
-        {"host": '172.16.103.5', "port": 5555, "nome": "Leo"},
-        {"host": '172.16.103.6', "port": 6666, "nome": "Lucia"},
-        {"host": '172.16.103.7', "port": 7777, "nome": "Carlos"},
-        {"host": '172.16.103.8', "port": 8888, "nome": "Ana"},
-        {"host": '172.16.103.9', "port": 9999, "nome": "Pedro"},
-        {"host": '172.16.103.10', "port": 1010, "nome": "Isabela"}  
+        {"host": '172.16.103.1', "port": 11, "nome": "Amancio"},
+        {"host": '172.16.103.2', "port": 22, "nome": "Augusto"},
+        {"host": '172.16.103.3', "port": 33, "nome": "Joao"},
+        {"host": '172.16.103.4', "port": 44, "nome": "Maria"},
+        {"host": '172.16.103.5', "port": 55, "nome": "Leo"},
+        {"host": '172.16.103.6', "port": 66, "nome": "Lucia"},
+        {"host": '172.16.103.7', "port": 77, "nome": "Carlos"},
+        {"host": '172.16.103.8', "port": 88, "nome": "Ana"},
+        {"host": '172.16.103.9', "port": 99, "nome": "Pedro"},
+        {"host": '172.16.103.10', "port": 10, "nome": "Isabela"}  
 
     ]
     my_info = {'host': '', 'port': '', 'nome': ''}
