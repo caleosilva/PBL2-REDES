@@ -119,7 +119,12 @@ def main():
         {"host": '172.16.103.2', "port": 2222, "nome": "Augusto"},
         {"host": '172.16.103.3', "port": 3333, "nome": "Joao"},
         {"host": '172.16.103.4', "port": 4444, "nome": "Maria"},
-        {"host": '172.16.103.5', "port": 5555, "nome": "Leo"}
+        {"host": '172.16.103.5', "port": 5555, "nome": "Leo"},
+        {"host": '172.16.103.6', "port": 6666, "nome": "Lucia"},
+        {"host": '172.16.103.7', "port": 7777, "nome": "Carlos"},
+        {"host": '172.16.103.8', "port": 8888, "nome": "Ana"},
+        {"host": '172.16.103.9', "port": 9999, "nome": "Pedro"},
+        {"host": '172.16.103.10', "port": 1010, "nome": "Isabela"}  
 
     ]
     my_info = {'host': '', 'port': '', 'nome': ''}
